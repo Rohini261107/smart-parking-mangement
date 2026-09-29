@@ -1,0 +1,44 @@
+{% extends 'portal_layout.html' %}
+{% block title %}Admin Dashboard | Smart Parking{% endblock %}
+{% block top_title %}Admin dashboard{% endblock %}
+{% block content %}
+<section class="admin-welcome welcome-row">
+    <div><p class="eyebrow">FACILITY OVERVIEW</p><h1>Parking operations</h1><p>Monitor occupancy, activity, and revenue across your facility.</p></div>
+    <a class="button button-light" href="{{ url_for('admin_section', section='parking-map') }}">View parking map <span aria-hidden="true">&#8594;</span></a>
+</section>
+<section class="stat-grid admin-stat-grid" aria-label="Facility statistics">
+    <article class="stat-card"><span class="stat-icon blue" aria-hidden="true">&#9638;</span><small>TOTAL SLOTS</small><strong>{{ total_slots }}</strong><span>Facility capacity</span></article>
+    <article class="stat-card"><span class="stat-icon green" aria-hidden="true">&#9678;</span><small>AVAILABLE</small><strong>{{ available_slots }}</strong><span>Ready to use</span></article>
+    <article class="stat-card"><span class="stat-icon red" aria-hidden="true">&#9632;</span><small>OCCUPIED</small><strong>{{ occupied_slots }}</strong><span>Currently in use</span></article>
+    <article class="stat-card"><span class="stat-icon amber" aria-hidden="true">&#9636;</span><small>RESERVED</small><strong>{{ reserved_slots }}</strong><span>Active bookings</span></article>
+    <article class="stat-card"><span class="stat-icon blue" aria-hidden="true">&#128101;</span><small>REGISTERED USERS</small><strong>{{ total_users }}</strong><span>User accounts</span></article>
+    <article class="stat-card"><span class="stat-icon green" aria-hidden="true">&#128663;</span><small>ACTIVE VEHICLES</small><strong>{{ currently_parked }}</strong><span>On the premises</span></article>
+</section>
+<div class="content-grid admin-overview-grid">
+    <section class="panel occupancy-panel">
+        <div class="panel-heading"><div><p class="eyebrow">LIVE CAPACITY</p><h2>Parking occupancy</h2></div><span class="status-badge neutral">{{ total_slots }} spaces</span></div>
+        <div class="occupancy-total"><strong>{{ occupied_slots }}</strong><span>occupied now</span></div>
+        <div class="occupancy-track" role="img" aria-label="{{ occupied_slots }} of {{ total_slots }} slots occupied"><span style="width: {{ (occupied_slots * 100 / total_slots)|round(0) if total_slots else 0 }}%"></span></div>
+        <div class="occupancy-legend"><span><i class="legend-occupied"></i>{{ occupied_slots }} occupied</span><span><i class="legend-available"></i>{{ available_slots }} available</span><span><i class="legend-booked"></i>{{ reserved_slots }} reserved</span></div>
+        <a class="text-link" href="{{ url_for('admin_section', section='parking-map') }}">Inspect all slots &#8594;</a>
+    </section>
+    <section class="panel revenue-panel">
+        <div class="panel-heading"><div><p class="eyebrow">REVENUE OVERVIEW</p><h2>Payment activity</h2></div><span class="stat-icon green" aria-hidden="true">&#8377;</span></div>
+        <div class="revenue-overview"><div><small>TODAY</small><strong>&#8377;{{ '%.2f'|format(today_revenue) }}</strong></div><div><small>ALL TIME</small><strong>&#8377;{{ '%.2f'|format(total_revenue) }}</strong></div></div>
+        <p>Successful demo payments and recorded legacy fees.</p><a class="text-link" href="{{ url_for('admin_section', section='revenue') }}">View revenue report &#8594;</a>
+    </section>
+</div>
+<section class="panel admin-map-panel">
+    <div class="panel-heading"><div><p class="eyebrow">FACILITY STATUS</p><h2>Parking slots</h2></div><a class="text-link" href="{{ url_for('admin_section', section='parking-map') }}">Full map &#8594;</a></div>
+    <div class="admin-slot-grid">{% for slot in slots %}<article class="admin-slot {{ slot.display_status }}"><strong>{{ slot.slot_id }}</strong><span class="status-badge {{ slot.display_status }}">{{ slot.display_status|capitalize }}</span>{% if slot.display_status == 'occupied' and slot.vehicle_number %}<small>{{ slot.vehicle_number }}</small>{% elif slot.display_status == 'booked' and slot.booking_vehicle_number %}<small>Reserved</small>{% else %}<small>&nbsp;</small>{% endif %}</article>{% else %}<div class="empty-state">No parking slots are configured.</div>{% endfor %}</div>
+</section>
+<div class="content-grid admin-tables-grid">
+    <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">LATEST ACTIVITY</p><h2>Recent parking activity</h2></div><a class="text-link" href="{{ url_for('admin_section', section='records') }}">All history &#8594;</a></div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>Vehicle</th><th>Slot</th><th>Entry</th><th>Exit</th><th>Amount</th><th>Status</th></tr></thead><tbody>{% for record in recent_records %}<tr><td>{{ record.vehicle_number }}</td><td>{{ record.slot_id }}</td><td>{{ record.entry_time }}</td><td>{{ record.exit_time or '?' }}</td><td>&#8377;{{ '%.2f'|format(record.amount_paid or record.fee or 0) }}</td><td><span class="status-badge {{ 'paid' if record.status == 'Completed' else 'active' }}">{{ record.status }}</span></td></tr>{% else %}<tr><td colspan="6" class="empty-cell">No parking activity yet.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+    <section class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">RESERVATIONS</p><h2>Recent bookings</h2></div><a class="text-link" href="{{ url_for('admin_section', section='bookings') }}">All bookings &#8594;</a></div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>Vehicle</th><th>Slot</th><th>Booked</th><th>Status</th></tr></thead><tbody>{% for item in recent_bookings %}<tr><td>{{ item.vehicle_number }}</td><td>{{ item.slot_id }}</td><td>{{ item.booking_time }}</td><td><span class="status-badge booked">{{ item.status }}</span></td></tr>{% else %}<tr><td colspan="4" class="empty-cell">No bookings recorded.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+</div>
+<section class="admin-quick-links" aria-label="Facility management"><a href="{{ url_for('admin_section', section='vehicles') }}"><span>01</span><strong>Vehicle registry</strong><small>Review active and past vehicles</small></a><a href="{{ url_for('admin_section', section='users') }}"><span>02</span><strong>User management</strong><small>View account registrations</small></a><a href="{{ url_for('admin_section', section='reports') }}"><span>03</span><strong>Reports</strong><small>Print a facility summary</small></a><a href="{{ url_for('admin_section', section='settings') }}"><span>04</span><strong>Settings</strong><small>Manage facility preferences</small></a></section>
+{% endblock %}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Slot | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('user_dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="{{ url_for('user_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('user_parking') }}">Parking Slots</a>
+            <a class="active" href="{{ url_for('booking') }}">Book a Slot</a>
+            <a href="{{ url_for('user_bookings') }}">My Bookings</a>
+        </nav>
+    </header>
+    <main class="page-shell narrow-shell">
+        <section class="page-intro">
+            <p class="eyebrow">RESERVE A SPACE</p>
+            <h1>Book a parking slot</h1>
+            <p>A booking reserves a space. The slot remains physically available until the vehicle enters.</p>
+        </section>
+
+        {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+
+        {% if booking %}
+        <section class="result-card" aria-live="polite">
+            <div class="result-icon">✓</div>
+            <p class="eyebrow">RESERVATION CONFIRMED</p>
+            <h2>Booking Successful</h2>
+            <dl class="detail-list">
+                <div><dt>Vehicle Number</dt><dd>{{ booking.vehicle_number }}</dd></div>
+                <div><dt>Vehicle Type</dt><dd>{{ booking.vehicle_type }}</dd></div>
+                <div><dt>Booked Slot</dt><dd>{{ booking.slot_id }}</dd></div>
+                <div><dt>Booking Time</dt><dd>{{ booking.booking_time }}</dd></div>
+                <div><dt>Booking Status</dt><dd>{{ booking.status }}</dd></div>
+            </dl>
+            <a class="button button-primary" href="{{ url_for('user_bookings') }}">View Bookings</a>
+        </section>
+        {% else %}
+        <form class="form-card" id="booking-form" action="{{ url_for('booking') }}" method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-field">
+                <label for="vehicle_number">Vehicle Number</label>
+                <input type="text" id="vehicle_number" name="vehicle_number" placeholder="e.g. MH12AB1234" value="{{ form_values.vehicle_number if form_values else '' }}" required>
+            </div>
+            <div class="form-field">
+                <label for="vehicle_type">Vehicle Type</label>
+                <select id="vehicle_type" name="vehicle_type" required>
+                    <option value="">Choose vehicle type</option>
+                    <option value="Car" {% if form_values and form_values.vehicle_type == 'Car' %}selected{% endif %}>Car</option>
+                    <option value="Bike" {% if form_values and form_values.vehicle_type == 'Bike' %}selected{% endif %}>Bike</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="slot_id">Parking Slot</label>
+                <select id="slot_id" name="slot_id" required>
+                    <option value="">Choose an available slot</option>
+                    {% for slot in slots %}
+                    <option value="{{ slot.slot_id }}" {% if form_values and form_values.slot_id == slot.slot_id %}selected{% endif %}>{{ slot.slot_id }} — Available</option>
+                    {% endfor %}
+                </select>
+                {% if not slots %}<small class="field-hint">No available slots to book right now.</small>{% endif %}
+            </div>
+            <p class="form-error" id="booking-error" role="alert" hidden></p>
+            <button class="button button-primary button-wide" type="submit" {% if not slots %}disabled{% endif %}>Book Parking Slot <span aria-hidden="true">→</span></button>
+        </form>
+        {% endif %}
+        <a class="back-link" href="{{ url_for('user_dashboard') }}">← Back to Dashboard</a>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

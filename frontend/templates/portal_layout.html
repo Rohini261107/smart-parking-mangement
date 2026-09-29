@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Smart Parking{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body class="app-body{% if request.endpoint == 'user_dashboard' %} user-dashboard-body{% endif %}">
+<aside class="app-sidebar" id="app-sidebar">
+    <a class="brand sidebar-brand" href="{{ url_for('dashboard') if g.current_user.role == 'admin' else url_for('user_dashboard') }}">
+        <span class="brand-mark">P</span><span>SMART<span class="brand-light"> PARKING</span>{% if request.endpoint == 'user_dashboard' %}<small class="sidebar-tagline">Park Smarter. Move Faster.</small>{% endif %}</span>
+    </a>
+    {% if g.current_user.role == 'admin' %}
+    <p class="sidebar-label">MANAGEMENT</p>
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('dashboard') }}"><span class="nav-symbol">&#9638;</span><span>Dashboard</span></a>
+        <a class="{{ 'active' if request.endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}"><span class="nav-symbol">&#9638;</span><span>Dashboard</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') == 'parking-map' else '' }}" href="{{ url_for('admin_section',section='parking-map') }}"><span class="nav-symbol">&#9678;</span><span>Parking slots</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') == 'vehicles' else '' }}" href="{{ url_for('admin_section',section='vehicles') }}"><span class="nav-symbol">&#128663;</span><span>Active vehicles</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') == 'users' else '' }}" href="{{ url_for('admin_section',section='users') }}"><span class="nav-symbol">&#9786;</span><span>Users</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') == 'bookings' else '' }}" href="{{ url_for('admin_section',section='bookings') }}"><span class="nav-symbol">&#9636;</span><span>Bookings</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') in ('records', 'history') or request.endpoint == 'records' else '' }}" href="{{ url_for('admin_section',section='records') }}"><span class="nav-symbol">&#9776;</span><span>Parking history</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') in ('payments', 'revenue') else '' }}" href="{{ url_for('admin_section',section='payments') }}"><span class="nav-symbol">&#9830;</span><span>Payments &amp; revenue</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') in ('analytics', 'reports') else '' }}" href="{{ url_for('admin_section',section='reports') }}"><span class="nav-symbol">&#9633;</span><span>Reports</span></a>
+        <a class="{{ 'active' if request.view_args and request.view_args.get('section') == 'settings' else '' }}" href="{{ url_for('admin_section',section='settings') }}"><span class="nav-symbol">&#9881;</span><span>Settings</span></a>
+    </nav>
+    {% else %}
+    <p class="sidebar-label">YOUR PARKING</p>
+    {% if request.endpoint == 'user_dashboard' %}<nav class="sidebar-nav user-sidebar-nav">
+        <a class="{% if request.endpoint == 'user_dashboard' %}active{% endif %}" href="{{ url_for('user_dashboard') }}"><span class="nav-symbol">&#9638;</span><span>Dashboard</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_parking' else '' }}" href="{{ url_for('user_parking') }}"><span class="nav-symbol">&#9678;</span><span>Find Parking</span></a>
+        <a class="{{ 'active' if request.endpoint == 'booking' or request.endpoint == 'user_bookings' else '' }}" href="{{ url_for('booking') }}"><span class="nav-symbol">&#9636;</span><span>Book Parking</span></a>
+        <a class="{{ 'active' if request.endpoint in ('user_entry', 'vehicle_entry') else '' }}" href="{{ url_for('user_entry') }}"><span class="nav-symbol">&#128663;</span><span>Vehicle Entry</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_current_parking' else '' }}" href="{{ url_for('user_current_parking') }}"><span class="nav-symbol">&#9636;</span><span>My Parking</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_exit' else '' }}" href="{{ url_for('user_exit') }}"><span class="nav-symbol">&#8599;</span><span>Vehicle Exit</span></a>
+        <a class="{{ 'active' if request.endpoint in ('user_payments', 'user_entry') else '' }}" href="{{ url_for('user_payments') }}"><span class="nav-symbol">&#9830;</span><span>Payments</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_history' else '' }}" href="{{ url_for('user_history') }}"><span class="nav-symbol">&#9776;</span><span>Parking History</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_bookings' else '' }}" href="{{ url_for('user_bookings') }}"><span class="nav-symbol">&#9636;</span><span>My Bookings</span></a>
+        <a class="{{ 'active' if request.endpoint in ('latest_user_receipt', 'user_receipt') else '' }}" href="{{ url_for('latest_user_receipt') }}"><span class="nav-symbol">&#9636;</span><span>Receipts</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_profile' else '' }}" href="{{ url_for('user_profile') }}"><span class="nav-symbol">&#9786;</span><span>Profile</span></a>
+    </nav>{% else %}<nav class="sidebar-nav">
+        <a class="{{ 'active' if request.endpoint == 'user_dashboard' else '' }}" href="{{ url_for('user_dashboard') }}">&#9638; <span>Dashboard</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_parking' else '' }}" href="{{ url_for('user_parking') }}">&#9678; <span>Parking slots</span></a>
+        <a class="{{ 'active' if request.endpoint in ('booking', 'user_bookings') else '' }}" href="{{ url_for('booking') }}">&#9636; <span>Book parking</span></a>
+        <a class="{{ 'active' if request.endpoint in ('user_entry', 'vehicle_entry') else '' }}" href="{{ url_for('user_entry') }}">&#43; <span>Vehicle entry</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_current_parking' else '' }}" href="{{ url_for('user_current_parking') }}">&#9711; <span>Current parking</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_exit' else '' }}" href="{{ url_for('user_exit') }}">&#8599; <span>Vehicle exit</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_payments' else '' }}" href="{{ url_for('user_payments') }}">&#9830; <span>Payments</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_history' else '' }}" href="{{ url_for('user_history') }}">&#9776; <span>Parking history</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_bookings' else '' }}" href="{{ url_for('user_bookings') }}">&#9636; <span>My bookings</span></a>
+        <a class="{{ 'active' if request.endpoint in ('latest_user_receipt', 'user_receipt') else '' }}" href="{{ url_for('latest_user_receipt') }}">&#9636; <span>Latest receipt</span></a>
+        <a class="{{ 'active' if request.endpoint == 'user_profile' else '' }}" href="{{ url_for('user_profile') }}">&#9786; <span>My vehicle &amp; profile</span></a>
+    </nav>{% endif %}
+    {% endif %}
+    <div class="sidebar-bottom"><span class="avatar">{{ g.current_user.name[:1]|upper }}</span><div class="account-copy"><strong>{{ g.current_user.name }}</strong><small>{{ g.current_user.role|capitalize }} account</small></div><form action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="icon-button" aria-label="Log out" title="Log out">&#10162;</button></form></div>
+</aside>
+<div class="app-main">
+    <header class="app-topbar">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">&#9776;</button>
+        <div class="topbar-heading"><span class="topbar-kicker">SMART PARKING</span><strong>{% block top_title %}Parking operations{% endblock %}</strong></div>
+        {% if request.endpoint == 'user_dashboard' %}<label class="dashboard-search"><span aria-hidden="true">&#9906;</span><input type="search" placeholder="Search parking slots, vehicle, or something..." aria-label="Search dashboard" data-dashboard-search></label>{% endif %}
+        <div class="topbar-right">
+            {% if request.endpoint == 'user_dashboard' %}<button class="notification-button" type="button" aria-label="Notifications"><span aria-hidden="true">&#128276;</span><i></i></button><span class="dashboard-user-copy"><strong>{{ g.current_user.name }}</strong><small>User</small></span>
+            {% else %}<span class="live-indicator"><i></i> System online</span>{% endif %}
+            <span class="topbar-role-badge">{{ g.current_user.role|upper }}</span><span class="avatar small-avatar">{{ g.current_user.name[:1]|upper }}</span>
+        </div>
+    </header>
+    <main class="app-content"><div class="toast-stack" aria-live="polite" aria-atomic="false">{% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert alert-{{ category }}" role="status">{{ message }}<button type="button" class="toast-close" aria-label="Dismiss notification">&times;</button></div>{% endfor %}{% endwith %}</div>{% block content %}{% endblock %}</main>
+    <footer class="app-footer">Smart Parking Management System <span>College PBL &middot; Secure session</span></footer>
+</div>
+</body>
+</html>

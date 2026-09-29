@@ -1,0 +1,84 @@
+{% extends 'portal_layout.html' %}
+{% block title %}Dashboard | Smart Parking{% endblock %}
+{% block top_title %}Dashboard{% endblock %}
+{% block content %}
+<section class="user-welcome">
+    <div>
+        <p class="eyebrow">PERSONAL PARKING</p>
+        <h1>Smart parking made simple.</h1>
+        <p>Find your space, park smarter, and get moving.</p>
+    </div>
+    <div class="welcome-actions"><a class="button button-primary park-now-cta" href="{{ url_for('user_entry') }}">Park Now <span aria-hidden="true">&#8594;</span></a><a class="button button-light" href="{{ url_for('user_parking') }}">View parking</a></div>
+</section>
+
+<section class="user-overview-grid" aria-label="Your parking statistics">
+    <article class="user-stat-card"><span class="user-stat-icon stat-green" aria-hidden="true">&#9678;</span><small>AVAILABLE SLOTS</small><strong>{{ available_slots }}</strong><span>of {{ total_slots }} facility spaces</span></article>
+    <article class="user-stat-card"><span class="user-stat-icon stat-red" aria-hidden="true">&#9632;</span><small>OCCUPIED</small><strong>{{ occupied_slots }}</strong><span>Spaces in use</span></article>
+    <article class="user-stat-card"><span class="user-stat-icon stat-blue" aria-hidden="true">&#128663;</span><small>MY ACTIVE PARKING</small><strong>{{ 1 if active else 0 }}</strong><span>{{ active.slot_id if active else 'No active session' }}</span></article>
+    <article class="user-stat-card spent-stat"><span class="user-stat-icon stat-violet" aria-hidden="true">&#9830;</span><small>TOTAL SPENT</small><strong>&#8377;{{ '%.2f'|format(total_spent) }}</strong><span>Recorded payments</span></article>
+</section>
+
+<div class="user-dashboard-grid">
+    <section class="user-card parking-map-card">
+        <div class="user-card-heading"><div><p class="eyebrow">LIVE FACILITY VIEW</p><h2>Parking Map</h2><p>Real-time parking slot availability</p></div><a class="user-text-link" href="{{ url_for('user_parking') }}">View all <span aria-hidden="true">&#8594;</span></a></div>
+        <div class="map-legend"><span><i class="legend-available"></i>Available</span><span><i class="legend-occupied"></i>Occupied</span><span><i class="legend-booked"></i>Reserved</span></div>
+        <div class="parking-lot-frame">
+            <div class="lot-marker">ENTRANCE <span aria-hidden="true">&#8595;</span></div>
+        <div class="parking-bay-grid" data-entry-url="{{ url_for('user_entry') }}">
+                {% for slot in slots %}
+                <button type="button" class="parking-bay {{ slot.display_status }}" data-parking-bay data-slot-id="{{ slot.slot_id }}" data-slot-status="{{ slot.display_status }}" aria-label="{{ slot.slot_id }} {{ slot.display_status|capitalize }}">
+                    <span class="bay-car" aria-hidden="true">{% if slot.display_status == 'occupied' %}&#128663;{% else %}&#183;{% endif %}</span>
+                    <strong>{{ slot.slot_id }}</strong><small>{{ slot.display_status|capitalize }}</small>
+                </button>
+                {% else %}<div class="dashboard-empty">No parking slots are available to display.</div>{% endfor %}
+            </div>
+            <div class="lot-marker lot-exit">EXIT <span aria-hidden="true">&#8595;</span></div>
+        </div>
+        <div class="slot-detail-panel" data-slot-detail aria-live="polite"><span class="detail-pin" aria-hidden="true">P</span><div><strong data-detail-title>Select a parking bay</strong><p data-detail-copy>Choose a space on the map to see its current status.</p></div><a class="button button-primary" data-detail-action href="{{ url_for('user_parking') }}">Find a space</a></div>
+    </section>
+
+    <section class="user-card my-vehicle-card">
+        <div class="user-card-heading"><div><p class="eyebrow">YOUR CURRENT SESSION</p><h2>My Vehicle</h2></div><span class="session-badge {{ 'is-active' if active else 'is-ready' }}">{{ 'PARKED' if active else 'READY' }}</span></div>
+        {% if active %}
+        <div class="vehicle-hero"><span class="vehicle-illustration" aria-hidden="true">&#128663;</span><div><small>{{ active.vehicle_type or 'Vehicle' }}</small><strong>{{ active.vehicle_number }}</strong></div></div>
+        <dl class="vehicle-details"><div><dt>Current slot</dt><dd>{{ active.slot_id }}</dd></div><div><dt>Entry time</dt><dd>{{ active.entry_time }}</dd></div><div><dt>Payment status</dt><dd><span class="paid-label">{{ active.payment_status or 'Paid' }}</span></dd></div></dl>
+        <div class="vehicle-actions"><a class="button button-light" href="{{ url_for('user_profile') }}">View details</a><a class="button button-primary" href="{{ url_for('user_exit') }}">Confirm exit</a></div>
+        {% else %}
+        <div class="vehicle-hero"><span class="vehicle-illustration" aria-hidden="true">&#128663;</span><div><small>{{ g.current_user.vehicle_type or 'Vehicle' }}</small><strong>{{ g.current_user.vehicle_number or 'Add your vehicle' }}</strong></div></div>
+        <dl class="vehicle-details"><div><dt>Current status</dt><dd><span class="session-badge is-ready">READY</span></dd></div><div><dt>Current slot</dt><dd>—</dd></div></dl>
+        <div class="vehicle-empty"><p>No active parking. Your vehicle details are ready when you are.</p><a href="{{ url_for('user_entry') }}">Park now <span aria-hidden="true">&#8594;</span></a></div>
+        {% endif %}
+    </section>
+
+    <section class="user-card activity-card">
+        <div class="user-card-heading"><div><p class="eyebrow">YOUR PARKING TIMELINE</p><h2>Recent Activity</h2></div><a class="user-text-link" href="{{ url_for('user_history') }}">History <span aria-hidden="true">&#8594;</span></a></div>
+        {% if recent_records %}<div class="activity-list">
+            {% for record in recent_records[:4] %}
+            <article class="activity-item"><span class="activity-mark {{ 'activity-exit' if record.status == 'Completed' else 'activity-entry' }}" aria-hidden="true">{{ '&#8593;' if record.status == 'Completed' else '&#8595;' }}</span><div><strong>{{ 'Vehicle exited' if record.status == 'Completed' else 'Vehicle parked' }}</strong><p>{{ record.vehicle_number }} &middot; {{ record.slot_id }}</p></div><time>{{ record.exit_time if record.status == 'Completed' and record.exit_time else record.entry_time }}</time></article>
+            {% endfor %}
+        </div>{% else %}<div class="dashboard-empty">No recent activity.</div>{% endif %}
+    </section>
+
+    <section class="user-card bookings-card">
+        <div class="user-card-heading"><div><p class="eyebrow">PARKING RESERVATIONS</p><h2>Your Bookings</h2></div><a class="user-text-link" href="{{ url_for('user_parking') }}">Find parking <span aria-hidden="true">&#8594;</span></a></div>
+        {% set booked_slots = bookings|selectattr('status', 'equalto', 'Booked')|list %}
+        {% if booked_slots %}<div class="booking-list">{% for slot in booked_slots %}<article class="booking-item"><span class="booking-calendar" aria-hidden="true">&#9636;</span><div><strong>{{ slot.slot_id }} <span class="reserved-label">Reserved</span></strong><p>{{ slot.booking_time or 'Booking time not available' }}</p></div><span class="booking-vehicle">{{ slot.vehicle_number }}</span></article>{% endfor %}</div>
+        {% else %}<div class="dashboard-empty booking-empty"><span aria-hidden="true">&#128203;</span><p>No active bookings to show.</p><a href="{{ url_for('user_parking') }}">Browse parking spaces</a></div>{% endif %}
+    </section>
+
+    <section class="user-card quick-actions-card">
+        <div class="user-card-heading"><div><p class="eyebrow">A SHORTCUT FOR WHAT YOU NEED</p><h2>Quick Actions</h2></div></div>
+        <div class="quick-action-cards">
+            <a href="{{ url_for('user_entry') }}"><span class="quick-icon quick-teal" aria-hidden="true">&#9678;</span><strong>Park Now</strong><small>Start a parking session</small><b aria-hidden="true">&#8594;</b></a><a href="{{ url_for('user_parking') }}"><span class="quick-icon quick-blue" aria-hidden="true">&#9638;</span><strong>View Parking</strong><small>Explore available spaces</small><b aria-hidden="true">&#8594;</b></a>
+            <a href="{{ url_for('user_payments') }}"><span class="quick-icon quick-blue" aria-hidden="true">&#9830;</span><strong>Payments</strong><small>Review entry payments</small><b aria-hidden="true">&#8594;</b></a>
+            <a href="{{ url_for('user_exit') }}"><span class="quick-icon quick-amber" aria-hidden="true">&#8594;</span><strong>Vehicle Exit</strong><small>Finish your session</small><b aria-hidden="true">&#8594;</b></a>
+            <a href="{{ url_for('latest_user_receipt') }}"><span class="quick-icon quick-violet" aria-hidden="true">&#9636;</span><strong>View Receipts</strong><small>Open your latest receipt</small><b aria-hidden="true">&#8594;</b></a>
+        </div>
+    </section>
+
+    <section class="user-card recent-records-card">
+        <div class="user-card-heading"><div><p class="eyebrow">YOUR ACCOUNT</p><h2>Recent Parking Sessions</h2></div><a class="user-text-link" href="{{ url_for('user_history') }}">See history <span aria-hidden="true">&#8594;</span></a></div>
+        {% if recent_records %}<div class="dashboard-table-scroll"><table class="dashboard-table"><thead><tr><th>Vehicle</th><th>Slot</th><th>Entry</th><th>Exit</th><th>Amount</th><th>Status</th></tr></thead><tbody>{% for record in recent_records %}<tr><td><strong>{{ record.vehicle_number }}</strong></td><td>{{ record.slot_id }}</td><td>{{ record.entry_time }}</td><td>{{ record.exit_time or '—' }}</td><td>₹{{ '%.2f'|format(record.amount_paid or record.fee or 0) }}</td><td><span class="table-status {{ 'status-completed' if record.status == 'Completed' else 'status-parked' }}">{{ record.status }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="dashboard-empty">Your parking sessions will appear here.</div>{% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-shell narrow-shell error-page">
+        <section class="result-card">
+            <p class="eyebrow">403 ERROR</p>
+            <h1>Access denied</h1>
+            <p>Your account does not have permission to view this page.</p>
+            <a class="button button-primary" href="{{ url_for('login') }}">Sign in with another account</a>
+        </section>
+    </main>
+</body>
+</html>

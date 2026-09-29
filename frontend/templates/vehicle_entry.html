@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Entry | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a><nav class="main-nav" aria-label="Main navigation"><a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('show_slots') }}">Parking Slots</a><a class="active" href="{{ url_for('vehicle_entry') }}">Vehicle Entry</a><a href="{{ url_for('vehicle_exit') }}">Vehicle Exit</a></nav></header>
+    <main class="page-shell narrow-shell">
+        <section class="page-intro"><p class="eyebrow">ARRIVAL</p><h1>Vehicle entry</h1><p>Enter the vehicle details to assign the next available slot.</p></section>
+        {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+        {% if full %}<div class="alert alert-error" role="alert"><strong>Parking Full</strong><br>There are no available slots right now.</div>{% endif %}
+        {% if vehicle %}
+        <section class="result-card success-card" aria-live="polite"><div class="result-icon">✓</div><p class="eyebrow">ENTRY RECORDED</p><h2>Vehicle parked successfully</h2><dl class="detail-list"><div><dt>Vehicle number</dt><dd>{{ vehicle.vehicle_number }}</dd></div><div><dt>Vehicle type</dt><dd>{{ vehicle.vehicle_type }}</dd></div><div><dt>Assigned slot</dt><dd>{{ slot.slot_id }}</dd></div><div><dt>Entry time</dt><dd>{{ entry_time }}</dd></div><div><dt>Payment option</dt><dd>{{ payment_method }}</dd></div></dl><p class="success-note">The final parking fee will be calculated at exit.</p><a class="button button-primary" href="{{ url_for('show_slots') }}">View Parking Slots</a></section>
+        {% else %}
+        <form class="form-card" id="entry-form" action="{{ url_for('vehicle_entry') }}" method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-field"><label for="vehicle_number">Vehicle number</label><input type="text" id="vehicle_number" name="vehicle_number" placeholder="e.g. MH12AB1234" autocomplete="off" required><small class="field-hint">Enter the registration number.</small></div>
+            <div class="form-field"><label for="vehicle_type">Vehicle type</label><select id="vehicle_type" name="vehicle_type" required><option value="">Choose vehicle type</option><option value="Car">Car</option><option value="Bike">Bike</option></select></div>
+            <div class="form-field">
+                <label for="payment_method">Payment option</label>
+                <select id="payment_method" name="payment_method" required>
+                    <option value="UPI" selected>UPI</option>
+                </select>
+                <small class="field-hint">The final parking fee is calculated when the vehicle exits. UPI payment details can be added once a merchant UPI ID is configured.</small>
+            </div>
+            <p class="form-error" id="entry-error" role="alert" hidden></p><button class="button button-primary button-wide" type="submit">Park Vehicle <span aria-hidden="true">→</span></button>
+        </form>
+        {% endif %}
+        <a class="back-link" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

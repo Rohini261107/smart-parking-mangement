@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking History | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('show_slots') }}">Parking Slots</a>
+            <a class="active" href="{{ url_for('records') }}">Parking History</a>
+        </nav>
+    </header>
+    <main class="page-shell">
+        <section class="page-intro">
+            <p class="eyebrow">PARKING ACTIVITY</p>
+            <h1>Parking history</h1>
+            <p>Entry and exit records saved in the parking database.</p>
+        </section>
+
+        <form class="record-search-form" action="{{ url_for('records') }}" method="get">
+            <div class="search-field">
+                <label for="vehicle_number">Vehicle Number</label>
+                <input type="search" id="vehicle_number" name="vehicle_number" placeholder="Search by vehicle number" value="{{ vehicle_number }}">
+            </div>
+            <div class="search-field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="" {% if not selected_status %}selected{% endif %}>All</option>
+                    <option value="Parked" {% if selected_status == 'Parked' %}selected{% endif %}>Parked</option>
+                    <option value="Completed" {% if selected_status == 'Completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="search-actions">
+                <button class="button button-primary" type="submit">Search</button>
+                <a class="button button-light" href="{{ url_for('records') }}">Clear</a>
+            </div>
+        </form>
+
+        {% if error %}
+        <div class="alert alert-error" role="alert">{{ error }}</div>
+        {% elif records %}
+        <div class="records-table-wrapper">
+            <table class="records-table">
+                <thead>
+                    <tr>
+                        <th>Record ID</th>
+                        <th>Vehicle Number</th>
+                        <th>Parking Slot</th>
+                        <th>Entry Time</th>
+                        <th>Exit Time</th>
+                        <th>Duration (hours)</th>
+                        <th>Fee (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ record.id }}</td>
+                        <td>{{ record.vehicle_number }}</td>
+                        <td>{{ record.slot_id }}</td>
+                        <td>{{ record.entry_time }}</td>
+                        <td>{{ record.exit_time or "—" }}</td>
+                        <td>{% if record.duration is not none %}{{ "%.2f"|format(record.duration) }}{% else %}—{% endif %}</td>
+                        <td>{% if record.fee is not none %}{{ "%.2f"|format(record.fee) }}{% else %}—{% endif %}</td>
+                        <td><span class="record-status {% if record.status == 'Completed' %}completed{% endif %}">{{ record.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">No matching parking records found.</div>
+        {% endif %}
+
+        <a class="back-link" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Python cache artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Temporary and backup database files
+*.corrupt-backup
+*.db-journal
+*.db-wal
+*.db-shm
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment secrets
+.env
+.env.*
+!.env.example

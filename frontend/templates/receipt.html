@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Receipt | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a>
+    </header>
+    <main class="receipt-page">
+        <article class="receipt-card">
+            <header class="receipt-heading">
+                <span class="brand-mark">P</span>
+                <h1>SMART PARKING MANAGEMENT SYSTEM</h1>
+                <h2>Parking Receipt</h2>
+            </header>
+            <div class="receipt-body">
+                <p class="receipt-record-id">Receipt / Record ID: #{{ record.id }}</p>
+                <dl class="detail-list receipt-details">
+                    <div><dt>Vehicle Number</dt><dd>{{ record.vehicle_number }}</dd></div>
+                    <div><dt>Vehicle Type</dt><dd>{{ record.vehicle_type or "—" }}</dd></div>
+                    <div><dt>Parking Slot</dt><dd>{{ record.slot_id }}</dd></div>
+                    <div><dt>Entry Time</dt><dd>{{ record.entry_time }}</dd></div>
+                    <div><dt>Exit Time</dt><dd>{{ record.exit_time or "—" }}</dd></div>
+                    <div><dt>Parking Duration</dt><dd>{% if record.duration is not none %}{{ "%.2f"|format(record.duration) }} hours{% else %}—{% endif %}</dd></div>
+                    <div><dt>Status</dt><dd>{{ record.status }}</dd></div>
+                </dl>
+                <div class="receipt-total"><span>Parking Fee</span><strong>₹{% if record.fee is not none %}{{ "%.2f"|format(record.fee) }}{% else %}0.00{% endif %}</strong></div>
+                <p class="receipt-thanks">Thank you for using Smart Parking Management System.</p>
+            </div>
+        </article>
+        <nav class="receipt-actions" aria-label="Receipt actions">
+            <a class="button button-light" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+            <a class="button button-outline" href="{{ url_for('records') }}">Parking History</a>
+            <button class="button button-primary" type="button" id="print-receipt">Print Receipt</button>
+        </nav>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

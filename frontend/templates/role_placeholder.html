@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-shell narrow-shell">
+        <section class="result-card">
+            <p class="eyebrow">SIGNED IN AS USER</p>
+            <h1>{{ page_title }}</h1>
+            <p>Welcome, {{ current_user.name }}. {{ message }}</p>
+            <form action="{{ url_for('logout') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="button button-light" type="submit">Logout</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

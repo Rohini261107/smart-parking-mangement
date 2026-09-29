@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Exit | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <header class="site-header"><a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a><nav class="main-nav" aria-label="Main navigation"><a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('show_slots') }}">Parking Slots</a><a href="{{ url_for('vehicle_entry') }}">Vehicle Entry</a><a class="active" href="{{ url_for('vehicle_exit') }}">Vehicle Exit</a></nav></header>
+    <main class="page-shell narrow-shell">
+        <section class="page-intro"><p class="eyebrow">DEPARTURE</p><h1>Vehicle exit</h1><p>Look up a parked vehicle to calculate its fee and free its slot.</p></section>
+        {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+        {% if not_found %}<div class="alert alert-error" role="alert">Vehicle not found in parking.</div>{% endif %}
+        {% if receipt %}
+        <section class="result-card receipt-card" aria-live="polite"><div class="result-icon">✓</div><p class="eyebrow">EXIT COMPLETE</p><h2>Parking receipt</h2><dl class="detail-list"><div><dt>Vehicle number</dt><dd>{{ receipt.vehicle_number }}</dd></div><div><dt>Vehicle type</dt><dd>{{ receipt.vehicle_type }}</dd></div><div><dt>Parking slot</dt><dd>{{ receipt.slot_id }}</dd></div><div><dt>Entry time</dt><dd>{{ receipt.entry_time }}</dd></div><div><dt>Exit time</dt><dd>{{ receipt.exit_time }}</dd></div><div><dt>Parking duration</dt><dd>{{ "%.2f"|format(receipt.duration) }} hours</dd></div></dl><div class="fee-total"><span>Total parking fee</span><strong>₹{{ receipt.fee }}</strong></div><p class="success-note">The slot is now available again.</p><a class="button button-primary" href="{{ url_for('show_slots') }}">View Parking Slots</a></section>
+        {% else %}
+        <form class="form-card" id="exit-form" action="{{ url_for('vehicle_exit') }}" method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-field"><label for="vehicle_number">Vehicle number</label><input type="text" id="vehicle_number" name="vehicle_number" placeholder="e.g. MH12AB1234" autocomplete="off" required><small class="field-hint">Use the same number entered at arrival.</small></div>
+            <p class="form-error" id="exit-error" role="alert" hidden></p><button class="button button-primary button-wide" type="submit">Calculate Fee &amp; Exit <span aria-hidden="true">→</span></button>
+        </form>
+        {% endif %}
+        <a class="back-link" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

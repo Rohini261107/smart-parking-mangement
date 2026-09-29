@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Slots | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a class="active" href="{{ url_for('show_slots') }}">Parking Slots</a>
+            <a href="{{ url_for('bookings') }}">View Bookings</a>
+        </nav>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-intro">
+            <p class="eyebrow">LIVE PARKING STATUS</p>
+            <h1>Parking slots</h1>
+            <p>See physical occupancy and active reservations across the parking lot.</p>
+        </section>
+
+        <section class="slot-summary" aria-label="Parking slot summary">
+            <article><span>Total Slots</span><strong>{{ summary.total }}</strong></article>
+            <article class="summary-available"><span>Available</span><strong>{{ summary.available }}</strong></article>
+            <article class="summary-occupied"><span>Occupied</span><strong>{{ summary.occupied }}</strong></article>
+            <article class="summary-booked"><span>Booked</span><strong>{{ summary.booked }}</strong></article>
+        </section>
+
+        <div class="slot-legend" aria-label="Slot status legend">
+            <span><i class="legend-dot dot-available"></i> Available</span>
+            <span><i class="legend-dot dot-occupied"></i> Occupied</span>
+            <span><i class="legend-dot dot-booked"></i> Booked</span>
+        </div>
+
+        <section class="slot-grid" aria-label="Parking slot layout">
+            {% for slot in slots %}
+            <article class="slot-card {{ slot.display_status }}">
+                <div class="slot-card-top">
+                    <span class="slot-symbol" aria-hidden="true">P</span>
+                    <span class="slot-status {{ slot.display_status }}">{{ slot.display_status|capitalize }}</span>
+                </div>
+                <h2>{{ slot.slot_id }}</h2>
+                {% if slot.display_status == 'occupied' and slot.vehicle_number %}
+                <p class="slot-detail">Vehicle: <strong>{{ slot.vehicle_number }}</strong></p>
+                {% elif slot.display_status == 'booked' %}
+                <p class="slot-detail">Reserved for: <strong>{{ slot.booking_vehicle_number }}</strong></p>
+                {% if slot.booking_time %}<p class="slot-subdetail">Booking time: {{ slot.booking_time }}</p>{% endif %}
+                {% else %}
+                <p class="slot-detail muted">Ready for parking</p>
+                {% endif %}
+                {% if slot.display_status == 'occupied' and slot.booking_vehicle_number %}
+                <p class="slot-subdetail">Active booking: {{ slot.booking_vehicle_number }}</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </section>
+
+        <div class="action-row page-actions">
+            <a class="button button-light" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        </div>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">P</span> Smart Parking</a>
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('show_slots') }}">Parking Slots</a>
+            <a class="active" href="{{ url_for('bookings') }}">View Bookings</a>
+        </nav>
+    </header>
+    <main class="page-shell">
+        <section class="page-intro">
+            <p class="eyebrow">RESERVATION ACTIVITY</p>
+            <h1>Parking bookings</h1>
+            <p>Reservations saved in the parking database.</p>
+        </section>
+        {% if bookings %}
+        <div class="bookings-table-wrapper">
+            <table class="bookings-table">
+                <thead><tr><th>Booking ID</th><th>Vehicle Number</th><th>Slot ID</th><th>Booking Time</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>{{ booking.vehicle_number }}</td>
+                        <td>{{ booking.slot_id }}</td>
+                        <td>{{ booking.booking_time }}</td>
+                        <td><span class="record-status">{{ booking.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">No bookings found.</div>
+        {% endif %}
+        <div class="action-row page-actions">
+            <a class="button button-light" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+        </div>
+    </main>
+    <footer class="site-footer"><span>Smart Parking Management System</span><span>College PBL Project</span></footer>
+</body>
+</html>

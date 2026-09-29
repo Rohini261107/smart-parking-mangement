@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something Went Wrong | Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-shell narrow-shell error-page">
+        <section class="result-card">
+            <p class="eyebrow">500 ERROR</p>
+            <h1>Something went wrong.</h1>
+            <p>Please try again in a moment.</p>
+            <a class="button button-primary" href="{{ url_for('admin_home') if session.get('role') == 'admin' else url_for('user_dashboard') if session.get('role') == 'user' else url_for('landing') }}">Back to Dashboard</a>
+        </section>
+    </main>
+</body>
+</html>

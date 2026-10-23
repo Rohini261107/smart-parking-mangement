@@ -54,7 +54,7 @@
         <div class="user-card-heading"><div><p class="eyebrow">YOUR PARKING TIMELINE</p><h2>Recent Activity</h2></div><a class="user-text-link" href="{{ url_for('user_history') }}">History <span aria-hidden="true">&#8594;</span></a></div>
         {% if recent_records %}<div class="activity-list">
             {% for record in recent_records[:4] %}
-            <article class="activity-item"><span class="activity-mark {{ 'activity-exit' if record.status == 'Completed' else 'activity-entry' }}" aria-hidden="true">{{ '&#8593;' if record.status == 'Completed' else '&#8595;' }}</span><div><strong>{{ 'Vehicle exited' if record.status == 'Completed' else 'Vehicle parked' }}</strong><p>{{ record.vehicle_number }} &middot; {{ record.slot_id }}</p></div><time>{{ record.exit_time if record.status == 'Completed' and record.exit_time else record.entry_time }}</time></article>
+            <article class="activity-item"><span class="activity-mark {{ 'activity-exit' if record.status == 'Completed' else 'activity-entry' }}" aria-hidden="true">{% if record.status == 'Completed' %}&#8593;{% else %}&#8595;{% endif %}</span><div><strong>{{ 'Vehicle exited' if record.status == 'Completed' else 'Vehicle parked' }}</strong><p>{{ record.vehicle_number }} &middot; {{ record.slot_id }}</p></div><time>{{ record.exit_time if record.status == 'Completed' and record.exit_time else record.entry_time }}</time></article>
             {% endfor %}
         </div>{% else %}<div class="dashboard-empty">No recent activity.</div>{% endif %}
     </section>

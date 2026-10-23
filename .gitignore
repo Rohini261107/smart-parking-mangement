@@ -31,3 +31,7 @@ desktop.ini
 .env
 .env.*
 !.env.example
+
+# Archives
+*.zip
+
